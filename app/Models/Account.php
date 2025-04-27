@@ -11,9 +11,7 @@ class Account extends Model
         'brand_id',
         'handle',
         'platform',
-        'username',
-        'password',
-        'token',
+        'foreign_id',
     ];
 
     public function brand()

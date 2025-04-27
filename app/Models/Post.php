@@ -47,19 +47,14 @@ class Post extends Model
             return;
         }
         // Logic to generate video from SVG
-        // $svg_path = storage_path('app/private/'.$this->svg);
         $mp4_path = 'posts/'.$this->id.'.mp4';
 
         $result = Process::path(base_path(''))->timeout(5000)
-            ->run('node node_modules/timecut/cli.js '. route('videoinput',$this->id). ' --launch-arguments="' . env('TIMECUT_EXTRA', '') . '" --viewport="1080,1920" --start-delay=1 --fps=30 --duration=4 --frame-cache --pix-fmt=yuv420p --screenshot-type=jpeg --output='. storage_path('app/public/' . $mp4_path));
-            // ->run('npx vite-node src/main.ts  --input='. $svg_path.'  --duration=5  --fps=30');
+            ->run('node node_modules/timecut/cli.js '. route('videoinput',$this->id). ' --launch-arguments="' . env('TIMECUT_EXTRA', '') . '" --viewport="1080,1920" --start-delay=1 --fps=30 --duration=4 --frame-cache --output-options="-colorspace bt709 -c:v libx264" --pix-fmt=yuv420p --screenshot-type=jpeg --output='. storage_path('app/public/' . $mp4_path));
+        ray($result);
         if ($result->failed()) {
             throw new \Exception('Failed to generate video: ' . $result->errorOutput());
         }
-        // $result_move = Process::path(base_path('svg-animation-to-video'))->run('mv '.$this->id.'.mov '. storage_path('app/public/'.$mp4_path));
-        // if($result_move->failed()) {
-        //     throw new \Exception('Failed to move video: ' . $result_move->errorOutput());
-        // }
 
         $this->mp4 = $mp4_path;
         $this->rendered_at = now();

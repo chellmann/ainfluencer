@@ -69,25 +69,9 @@ class PostResource extends Resource
                     ->label('Author')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('font-color')
-                    ->label('Font Color'),
-                Tables\Columns\TextColumn::make('font-size')
-                    ->label('Font Size'),
-                Tables\Columns\TextColumn::make('font-style')
-                    ->label('Font Style'),
-                Tables\Columns\TextColumn::make('caption')
-                    ->label('Caption')
-                    ->limit(50),
+
                 Tables\Columns\TextColumn::make('rendered_at')
                     ->label('Rendered At')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('posted_at')
-                    ->label('Posted At')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created At')
                     ->dateTime()
                     ->sortable(),
             ])

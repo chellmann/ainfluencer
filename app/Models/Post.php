@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Brand;
-use Mateffy\Color;
 use Illuminate\Support\Facades\Process;
 use OpenAI\Laravel\Facades\OpenAI;
+use function Illuminate\Events\queueable;
 
 class Post extends Model
 {
@@ -30,6 +29,13 @@ class Post extends Model
     public function brand()
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::created(queueable(function (Post $post) {
+            $post->generateCaption();
+        }));
     }
 
     public function generateVideo(){
@@ -57,8 +63,7 @@ class Post extends Model
         $result = OpenAI::chat()->create([
             'model' => 'gpt-4.1',
             'messages' => [
-                ['role' => 'system', 'content' => 'Du bist ein Content Creator für Social Media und erstellst ein Video. '.$this->brand->prompt_info.' Das Video ist nur 3 Sekunden lang.
-Antworte in JSON. Erstelle mir die Caption für den Post auf Instagram, verwende passende Hashtags (variable: caption). Erstelle mir einen Prompt zur KI Erstellung eines passenden Hintergrundbildes, dabei soll im unteren drittel des bildes keine wichtigen elemente platziert werden. (variable: prompt).'],
+                ['role' => 'system', 'content' => 'Du bist ein Content Creator für Social Media und erstellst ein Video. '.$this->brand->prompt_info.' Das Video ist nur 3 Sekunden lang. Antworte in JSON. Erstelle mir die Caption für den Post auf Instagram, verwende passende Hashtags (variable: caption). Erstelle mir einen Prompt zur KI Erstellung eines passenden Hintergrundbildes, dabei soll im unteren drittel des bildes keine wichtigen elemente platziert werden. (variable: prompt).'],
                 ['role' => 'user', 'content' => 'Hier ist der Text: '. $this->text],
                 ['role' => 'user', 'content' => 'Hier ist der Autor: '. $this->author],
             ],
@@ -103,5 +108,9 @@ Antworte in JSON. Erstelle mir die Caption für den Post auf Instagram, verwende
         Storage::disk('public')->put($image_path, $image);
         $this->image = $image_path;
         $this->save();
+
+        dispatch(queueable(function (Post $post) {
+            $post->generateVideo();
+        })->delay(now()->addMinutes(1)));
     }
 }

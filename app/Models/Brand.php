@@ -9,6 +9,7 @@ class Brand extends Model
 {
     protected $fillable = [
         'name',
+        'prompt_info'
     ];
 
     public function accounts()

@@ -16,11 +16,11 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Brand::class);
             $table->text('text');
-            $table->text('author')->nullable();
-            $table->text('image');
-            $table->text('font_color')->default('#000000');
-            $table->text('font_size')->default('66');
-            $table->text('font_style')->default('1');
+            $table->string('author',255)->nullable();
+            $table->string('image',100)->nullable();
+            $table->string('font_color',10)->default('#000000');
+            $table->string('font_size',10)->default('66');
+            $table->string('font_style',10)->default('1');
             $table->text('caption')->nullable();
             $table->dateTime('started_at')->nullable();
             $table->dateTime('rendered_at')->nullable();

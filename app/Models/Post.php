@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Brand;
-use Illuminate\Support\Facades\Process;
-use OpenAI\Laravel\Facades\OpenAI;
 use function Illuminate\Events\queueable;
+use OpenAI\Laravel\Facades\OpenAI;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Process;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Music;
+use App\Models\Brand;
 
 class Post extends Model
 {
@@ -22,6 +23,7 @@ class Post extends Model
         'caption',
         'mp4',
         'svg',
+        'music_id',
         'rendered_at',
         'posted_at',
         'image_prompt',
@@ -35,6 +37,10 @@ class Post extends Model
         return $this->belongsTo(Brand::class);
     }
 
+    public function music(){
+        return $this->belongsTo(Music::class);
+    }
+
     protected static function booted(): void
     {
         static::created(queueable(function (Post $post) {
@@ -44,17 +50,33 @@ class Post extends Model
 
     public function generateVideo(){
         if (!$this->unblock_video) {
-            return;
+            throw new \Exception('Video generation is blocked.');
         }
         // Logic to generate video from SVG
         $mp4_path = 'posts/'.$this->id.'.mp4';
 
         $result = Process::path(base_path(''))->timeout(5000)
-            ->run('node node_modules/timecut/cli.js '. route('videoinput',$this->id). ' --launch-arguments="' . env('TIMECUT_EXTRA', '') . '" --viewport="1080,1920" --start-delay=1 --fps=30 --duration=4 --frame-cache --output-options="-colorspace bt709 -c:v libx264" --pix-fmt=yuv420p --screenshot-type=jpeg --output='. storage_path('app/public/' . $mp4_path));
+            ->run('node node_modules/timecut/cli.js '. route('videoinput',$this->id). ' --launch-arguments="' . env('TIMECUT_EXTRA', '') . '" --viewport="1080,1920" --start-delay=1 --fps=30 --duration=4 --frame-cache --output-options="-colorspace bt709 -c:v libx264" --pix-fmt=yuv420p --screenshot-type=jpeg --output=tmp.mp4');
         ray($result);
+
+        if($this->music){
+            $music_path = storage_path('app/public/'.$this->music->file);
+            if (!file_exists($music_path)) {
+                throw new \Exception('Music file not found: ' . $music_path);
+            }
+            $result = Process::path(base_path(''))->timeout(5000)
+                ->run('ffmpeg -i tmp.mp4 '. (!$this->music->start_time ?: '-itsoffset -'. $this->music->start_time) .' -i '. $music_path. ' -c copy -map 0:v:0 -map 1:a:0 -shortest -c:a aac -b:a 192k ' . storage_path('app/public/' . $mp4_path));
+            ray($result);
+            Process::path(base_path(''))->run('rm tmp.mp4');
+        }else{
+            Process::path(base_path(''))->run('mv tmp.mp4 '. storage_path('app/public/' . $mp4_path));
+        }
+
         if ($result->failed()) {
             throw new \Exception('Failed to generate video: ' . $result->errorOutput());
         }
+
+        Process::path(base_path(''))->run('rm tmp.mp4');
 
         $this->mp4 = $mp4_path;
         $this->rendered_at = now();
@@ -78,6 +100,13 @@ class Post extends Model
         ray($json);
         $this->caption = $json['caption'];
         $this->image_prompt = $json['prompt'];
+        //check if brand has music
+        if (BrandMusic::where('brand_id', $this->brand_id)->count() != 0) {
+            //select random music from brand
+            $this->music_id = BrandMusic::where('brand_id', $this->brand_id)->inRandomOrder()->first()->id;
+        }
+
+
         $this->save();
     }
 

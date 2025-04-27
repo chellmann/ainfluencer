@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -46,6 +47,7 @@ class UploadInstagramReel implements ShouldQueue
         ];
 
         ray($args);
+        Log::info("posting to instagram", $args);
 
         $IG_MediaContainer = Http::post(env('FACEBOOK_PATH').$account->foreign_id.'/media', $args);
         //check if request was successful
@@ -57,6 +59,7 @@ class UploadInstagramReel implements ShouldQueue
             throw new \Exception('Instagram Media Container was not created: ' . $IG_MediaContainer->body());
         }
         // ray($IG_MediaContainer->json());
+        Log::info("return from instagram", $IG_MediaContainer->json());
 
         //check if media container is ready
         $status = '';
@@ -66,6 +69,7 @@ class UploadInstagramReel implements ShouldQueue
                 throw new \Exception('Instagram Media Container is not ready: ' . $status_request->body());
             }
             $status = $status_request->json('status_code');
+            Log::info("return from instagram status", $status_request->json());
             // ray($status_request->json());
             if($status != 'FINISHED'){
                 //wait 5 seconds before checking again

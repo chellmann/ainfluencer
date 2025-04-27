@@ -43,9 +43,12 @@ class PostResource extends Resource
                 //     ->default(1),
                 Forms\Components\Textarea::make('caption')->label('Caption'),
                 Forms\Components\Textarea::make('image_prompt')->label('Image Prompt'),
-                Forms\Components\Toggle::make('unblock_image')->label('erlaube Bildgenerierung'),
-                Forms\Components\Toggle::make('unblock_video')->label('erlaube Videoerstellung'),
-                Forms\Components\Toggle::make('unblock_post')->label('erlaube Posting'),
+                Forms\Components\Select::make('music_id')
+                    ->label('Music')
+                    ->relationship('music', 'name'),
+                Forms\Components\Toggle::make('unblock_image')->label('erlaube Bildgenerierung')->disabled(),
+                Forms\Components\Toggle::make('unblock_video')->label('erlaube Videoerstellung')->disabled(),
+                Forms\Components\Toggle::make('unblock_post')->label('erlaube Posting')->disabled(),
             ]);
     }
 

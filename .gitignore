@@ -21,3 +21,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/timecut-temp-*
+.DS_Store
+storage/.DS_Store

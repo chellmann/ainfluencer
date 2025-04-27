@@ -16,4 +16,8 @@ class Brand extends Model
     {
         return $this->hasMany(Account::class);
     }
+
+    public function music(){
+        return $this->belongsToMany(Music::class);
+    }
 }

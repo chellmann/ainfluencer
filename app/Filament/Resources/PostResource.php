@@ -2,16 +2,18 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PostResource\Pages;
-use App\Filament\Resources\PostResource\RelationManagers;
-use App\Models\Post;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables;
+use Filament\Resources\Resource;
+use Filament\Forms\Form;
+use Filament\Forms;
+use App\Models\Post;
+use App\Filament\Resources\PostResource\RelationManagers;
+use App\Filament\Resources\PostResource\Pages;
+use function Illuminate\Events\queueable;
 
 class PostResource extends Resource
 {
@@ -27,27 +29,23 @@ class PostResource extends Resource
                     ->label('Brand')
                     ->relationship('brand', 'name')
                     ->required(),
-                Forms\Components\TextInput::make('image')
-                    ->label('Image URL'),
-                Forms\Components\Textarea::make('text')
-                    ->label('Text')
-                    ->required(),
-                Forms\Components\TextInput::make('author')
-                    ->label('Author')
-                    ->maxLength(255),
-                Forms\Components\ColorPicker::make('font_color')
-                    ->label('Font Color')
-                    ->default('#000000'),
-                Forms\Components\TextInput::make('font_size')
-                    ->label('Font Size')
-                    ->numeric()
-                    ->default(66),
-                Forms\Components\TextInput::make('font_style')
-                    ->label('Font Style')
-                    ->numeric()
-                    ->default(1),
-                Forms\Components\Textarea::make('caption')
-                    ->label('Caption'),
+                // Forms\Components\TextInput::make('image')->label('Image URL'),
+                Forms\Components\Textarea::make('text')->required(),
+                Forms\Components\TextInput::make('author')->maxLength(255),
+                Forms\Components\ColorPicker::make('font_color')->default('#000000'),
+                // Forms\Components\TextInput::make('font_size')
+                //     ->label('Font Size')
+                //     ->numeric()
+                //     ->default(66),
+                // Forms\Components\TextInput::make('font_style')
+                //     ->label('Font Style')
+                //     ->numeric()
+                //     ->default(1),
+                Forms\Components\Textarea::make('caption')->label('Caption'),
+                Forms\Components\Textarea::make('image_prompt')->label('Image Prompt'),
+                Forms\Components\Toggle::make('unblock_image')->label('erlaube Bildgenerierung'),
+                Forms\Components\Toggle::make('unblock_video')->label('erlaube Videoerstellung'),
+                Forms\Components\Toggle::make('unblock_post')->label('erlaube Posting'),
             ]);
     }
 
@@ -69,6 +67,19 @@ class PostResource extends Resource
                     ->label('Author')
                     ->sortable()
                     ->searchable(),
+
+                ToggleColumn::make('unblock_image')
+                    ->afterStateUpdated(function ($record, $state) {
+                        dispatch(new \App\Jobs\GenerateBackground($record));
+                    }),
+                ToggleColumn::make('unblock_video')
+                    ->afterStateUpdated(function ($record, $state) {
+                        dispatch(new \App\Jobs\GenerateVideo($record));
+                    }),
+                ToggleColumn::make('unblock_post')
+                ->afterStateUpdated(function ($record, $state) {
+                    dispatch(new \App\Jobs\UploadInstagramReel($record));
+                }),
 
                 Tables\Columns\TextColumn::make('rendered_at')
                     ->label('Rendered At')

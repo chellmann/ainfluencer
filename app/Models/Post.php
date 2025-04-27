@@ -24,6 +24,10 @@ class Post extends Model
         'svg',
         'rendered_at',
         'posted_at',
+        'image_prompt',
+        'unblock_image',
+        'unblock_video',
+        'unblock_post',
     ];
 
     public function brand()
@@ -39,6 +43,9 @@ class Post extends Model
     }
 
     public function generateVideo(){
+        if (!$this->unblock_video) {
+            return;
+        }
         // Logic to generate video from SVG
         // $svg_path = storage_path('app/private/'.$this->svg);
         $mp4_path = 'posts/'.$this->id.'.mp4';
@@ -55,11 +62,11 @@ class Post extends Model
         // }
 
         $this->mp4 = $mp4_path;
+        $this->rendered_at = now();
         $this->save();
     }
 
     public function generateCaption(){
-        ray('generateCaption');
         $result = OpenAI::chat()->create([
             'model' => 'gpt-4.1',
             'messages' => [
@@ -75,14 +82,17 @@ class Post extends Model
         }
         ray($json);
         $this->caption = $json['caption'];
+        $this->image_prompt = $json['prompt'];
         $this->save();
-        $this->generateBackgroundWithAi($json['prompt']);
     }
 
-    public function generateBackgroundWithAi($prompt){
-        ray('generateBackgroundWithAi',$prompt);
+    public function generateBackgroundWithAi(){
+        if(!$this->unblock_image) {
+            return;
+        }
+
         $result = OpenAI::images()->create([
-            'prompt' => $prompt,
+            'prompt' => $this->image_prompt,
             'model' => 'gpt-image-1',
             'n' => 1,
             'size' => '1024x1536',
@@ -109,8 +119,5 @@ class Post extends Model
         $this->image = $image_path;
         $this->save();
 
-        dispatch(queueable(function (Post $post) {
-            $post->generateVideo();
-        })->delay(now()->addMinutes(1)));
     }
 }

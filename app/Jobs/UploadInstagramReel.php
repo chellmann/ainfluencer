@@ -17,6 +17,9 @@ class UploadInstagramReel implements ShouldQueue
 
     public function handle()
     {
+        if(!$this->post->unblock_post){
+            throw new \Exception('Post is not unblock');
+        }
         // ray($this->post);
         //check if media and caption are givven
         if($this->post->mp4 == null || $this->post->caption == null){

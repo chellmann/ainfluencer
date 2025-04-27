@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\BrandResource\RelationManagers;
+namespace App\Filament\Resources\MusicResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -10,9 +10,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class MusicRelationManager extends RelationManager
+class BrandRelationManager extends RelationManager
 {
-    protected static string $relationship = 'music';
+    protected static string $relationship = 'brands';
 
     public function form(Form $form): Form
     {
@@ -36,7 +36,7 @@ class MusicRelationManager extends RelationManager
             ])
             ->headerActions([
                 // Tables\Actions\CreateAction::make(),
-                Tables\Actions\AttachAction::make()->multiple(),
+                Tables\Actions\AttachAction::make(),
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),

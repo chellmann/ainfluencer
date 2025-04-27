@@ -70,16 +70,16 @@ class PostResource extends Resource
 
                 ToggleColumn::make('unblock_image')
                     ->afterStateUpdated(function ($record, $state) {
-                        dispatch(new \App\Jobs\GenerateBackground($record));
+                        if($state) dispatch(new \App\Jobs\GenerateBackground($record));
                     }),
                 ToggleColumn::make('unblock_video')
                     ->afterStateUpdated(function ($record, $state) {
-                        dispatch(new \App\Jobs\GenerateVideo($record));
+                        if($state) dispatch(new \App\Jobs\GenerateVideo($record));
                     }),
                 ToggleColumn::make('unblock_post')
-                ->afterStateUpdated(function ($record, $state) {
-                    dispatch(new \App\Jobs\UploadInstagramReel($record));
-                }),
+                    ->afterStateUpdated(function ($record, $state) {
+                        if($state) dispatch(new \App\Jobs\UploadInstagramReel($record));
+                    }),
 
                 Tables\Columns\TextColumn::make('rendered_at')
                     ->label('Rendered At')

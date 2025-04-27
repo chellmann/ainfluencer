@@ -39,7 +39,7 @@ class UploadInstagramReel implements ShouldQueue
         //prepare argument array
         $args = [
             'media_type' => 'REELS',
-            'video_url' => url($this->post->mp4),
+            'video_url' => url('storage/'.$this->post->mp4),
             'caption' => $this->post->caption,
             'share_to_feed' => true,
             'access_token' => env('INSTAGRAM_TOKEN'),

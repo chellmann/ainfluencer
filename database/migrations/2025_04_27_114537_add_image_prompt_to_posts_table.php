@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->text('image_prompt')->nullable()->default('')->after('caption');
+            $table->text('image_prompt')->nullable()->after('caption');
             $table->boolean('unblock_image')->nullable()->default(false)->after('caption');
             $table->boolean('unblock_video')->nullable()->default(false)->after('caption');
             $table->boolean('unblock_post')->nullable()->default(false)->after('caption');

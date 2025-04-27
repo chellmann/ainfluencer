@@ -10,7 +10,7 @@
             margin: 0;
             overflow: hidden;
             height: 1920px;
-            background-image: url(/{{ $post->image }});
+            background-image: url(/storage/{{ $post->image }});
             /* Ersetze 'dein-bild.png' mit dem Pfad zu deinem Bild */
             background-size: cover;
             /*animation: moveBackground 40s linear infinite;*/

@@ -32,43 +32,6 @@ class Post extends Model
         return $this->belongsTo(Brand::class);
     }
 
-    public function generateVector(){
-        // Logic to generate vector image
-
-        //generate textblock
-        $textblock = '';
-        foreach (explode("\n",$this->text) as $line) {
-            # code...
-            $textblock .= '<tspan x="50%" dy="1.2em">'.$line.'</tspan>';
-        }
-        if($this->author != ""){
-            $textblock .= '<tspan x="50%" dy="1.8em" font-size="'. $this->font_size/1.25 . '">          -  '. $this->author .'</tspan>';
-        }
-
-        $font_color = Color::hex($this->font_color);
-
-        $svg = '<svg width="1080" height="1920" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <pattern id="bg" patternUnits="userSpaceOnUse" width="2000" height="1920">
-      <image href="'.url($this->image). '" x="-10" y="0" height="1920" />
-    </pattern>
-  </defs>
-  <rect width="200%" height="140%" fill="url(#bg)">
-    <animateTransform attributeName="transform" type="translate" from="-30 0" to="0 0" dur="3s" repeatCount="indefinite" />
-  </rect>
-
-  <text x="50%" y="70%" text-anchor="middle" dominant-baseline="middle"  stroke="'. $font_color->invert()->toHexString(). '" opacity="75%" stroke-width="' . $this->font_size . '" stroke-linecap="round" stroke-linejoin="round" font-size="'.$this->font_size.'" >'. $textblock.'</text>
-  <text x="50%" y="70%" text-anchor="middle" dominant-baseline="middle"   fill="'.$this->font_color.'" font-size="'.$this->font_size.'" >'. $textblock.'</text>
-</svg>';
-
-        //save svg to file
-        $svg_path = 'posts/'.$this->id.'.svg';
-        Storage::put($svg_path, $svg);
-        $this->svg = $svg_path;
-        $this->rendered_at = now();
-        $this->save();
-    }
-
     public function generateVideo(){
         // Logic to generate video from SVG
         // $svg_path = storage_path('app/private/'.$this->svg);

@@ -32,7 +32,7 @@ class BrandResource extends Resource
                 Forms\Components\Textarea::make('prompt_info')
                     ->label('Prompt Info')
                     ->rows(5)
-                    ->maxLength(100)
+                    ->maxLength(255)
                     ->helperText('Wird an ChatGPT übergben für das erzeugen der Caption und des Bildes. Tonalität und intension können mit übergben werden.'),
             ]);
     }

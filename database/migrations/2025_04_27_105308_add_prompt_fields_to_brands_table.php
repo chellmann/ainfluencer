@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('brands', function (Blueprint $table) {
-            $table->string('prompt_info', 100)->nullable()->default('');
+            $table->string('prompt_info', 255)->nullable()->default('');
         });
     }
 

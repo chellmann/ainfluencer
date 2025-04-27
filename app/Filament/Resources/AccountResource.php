@@ -24,24 +24,20 @@ class AccountResource extends Resource
         return $form
             ->schema([
                 //
+                Forms\Components\Select::make('brand_id')
+                    ->relationship(name: 'Brand', titleAttribute: 'name'),
                 Forms\Components\TextInput::make('handle')
                     ->required()
                     ->maxLength(255)
                     ->label('Account Handle'),
-                Forms\Components\TextInput::make('platform')
+                Forms\Components\Select::make('platform')
                     ->required()
-                    ->maxLength(255)
-                    ->label('Platform'),
-                Forms\Components\Select::make('brand_id')
-                    ->relationship(name: 'Brand', titleAttribute: 'name'),
-                Forms\Components\TextInput::make('username'),
-                Forms\Components\TextInput::make('password')
-                    ->password()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('token')
-                    ->maxLength(255)
-                    ->label('Access Token'),
+                    ->options([
+                        'instagram' => 'Instagram',
+                        'tiktok' => 'TikTok',
+                        'youtube' => 'YouTube',
+                    ]),
+                Forms\Components\TextInput::make('foreign_id')->label('ID auf Platform'),
             ]);
     }
 

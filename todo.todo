@@ -1,0 +1,38 @@
+- brand
+    - name
+- account
+    - brand id
+    - handle
+    - platform
+    - key
+    - token
+- post
+    - brand id
+    - image
+    - text
+    - author
+    - font-color
+    - font-size
+    - font-style
+    - caption
+    - rendered
+    - posted
+- sound
+    - sound file
+    - sound name
+
+order of operations:
+✔ post created @done(25-04-23 18:19)
+-> vielleicht text als html?
+✔  caption creaton with ai @done(25-04-26 11:16)
+✔  background generation with ai @done(25-04-26 11:16)
+✔ svg generated @done(25-04-23 18:19)
+✔ svg to mp4 @done(25-04-23 20:14)
+- add sound
+- upload to platform
+    - instagram
+        - upload //Command UploadInstagramReel, Output id->dispatch CheckInstagramUploadStatus
+
+- automated workflow
+  - methods to commands
+  - chain commands together

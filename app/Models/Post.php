@@ -75,7 +75,7 @@ class Post extends Model
         $mp4_path = 'posts/'.$this->id.'.mp4';
 
         $result = Process::path(base_path(''))->timeout(5000)
-            ->run('node node_modules/timecut/cli.js '. route('videoinput',$this->id). ' --launch-arguments="--no-sandbox" --viewport="1080,1920" --start-delay=1 --fps=30 --duration=4 --frame-cache --pix-fmt=yuv420p --screenshot-type=jpeg --output='. storage_path('app/public/' . $mp4_path));
+            ->run('node node_modules/timecut/cli.js '. route('videoinput',$this->id). ' --launch-arguments="' . env('TIMECUT_EXTRA', '') . '" --viewport="1080,1920" --start-delay=1 --fps=30 --duration=4 --frame-cache --pix-fmt=yuv420p --screenshot-type=jpeg --output='. storage_path('app/public/' . $mp4_path));
             // ->run('npx vite-node src/main.ts  --input='. $svg_path.'  --duration=5  --fps=30');
         if ($result->failed()) {
             throw new \Exception('Failed to generate video: ' . $result->errorOutput());
@@ -94,7 +94,7 @@ class Post extends Model
         $result = OpenAI::chat()->create([
             'model' => 'gpt-4.1',
             'messages' => [
-                ['role' => 'system', 'content' => 'Du bist ein Content Creator für Social Media und erstellt ein Video welches die Menschen zum nachdenken anregen soll. Das Video ist nur 3 Sekunden lang.
+                ['role' => 'system', 'content' => 'Du bist ein Content Creator für Social Media und erstellst ein Video. '.$this->brand->prompt_info.' Das Video ist nur 3 Sekunden lang.
 Antworte in JSON. Erstelle mir die Caption für den Post auf Instagram, verwende passende Hashtags (variable: caption). Erstelle mir einen Prompt zur KI Erstellung eines passenden Hintergrundbildes, dabei soll im unteren drittel des bildes keine wichtigen elemente platziert werden. (variable: prompt).'],
                 ['role' => 'user', 'content' => 'Hier ist der Text: '. $this->text],
                 ['role' => 'user', 'content' => 'Hier ist der Autor: '. $this->author],

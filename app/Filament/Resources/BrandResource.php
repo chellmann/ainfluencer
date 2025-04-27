@@ -7,6 +7,7 @@ use App\Filament\Resources\BrandResource\RelationManagers;
 use App\Models\Brand;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\FormsComponent;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -28,6 +29,11 @@ class BrandResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->label('Brand Name'),
+                Forms\Components\Textarea::make('prompt_info')
+                    ->label('Prompt Info')
+                    ->rows(5)
+                    ->maxLength(100)
+                    ->helperText('Wird an ChatGPT übergben für das erzeugen der Caption und des Bildes. Tonalität und intension können mit übergben werden.'),
             ]);
     }
 

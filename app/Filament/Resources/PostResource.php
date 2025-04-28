@@ -11,6 +11,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\ImportAction;
 use Filament\Tables;
 use Filament\Resources\Resource;
 use Filament\Forms\Form;
@@ -18,6 +19,7 @@ use Filament\Forms;
 use App\Models\Post;
 use App\Filament\Resources\PostResource\RelationManagers;
 use App\Filament\Resources\PostResource\Pages;
+use App\Filament\Imports\PostImporter;
 
 class PostResource extends Resource
 {
@@ -136,6 +138,10 @@ class PostResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                ImportAction::make()
+                    ->importer(PostImporter::class)
             ])
             ->defaultSort('created_at', 'desc')
             ->poll('15s');

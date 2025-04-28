@@ -2,10 +2,15 @@
 
 namespace App\Filament\Resources;
 
+use function Illuminate\Events\queueable;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables;
 use Filament\Resources\Resource;
 use Filament\Forms\Form;
@@ -13,7 +18,6 @@ use Filament\Forms;
 use App\Models\Post;
 use App\Filament\Resources\PostResource\RelationManagers;
 use App\Filament\Resources\PostResource\Pages;
-use function Illuminate\Events\queueable;
 
 class PostResource extends Resource
 {
@@ -56,45 +60,74 @@ class PostResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('brand.name')
+                TextColumn::make('brand.name')
                     ->label('Brand')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\ImageColumn::make('image')
                     ->url(fn(Post $record): string => url('/posts/' . $record->id.'/preview'))
                     ->openUrlInNewTab(),
-                Tables\Columns\TextColumn::make('text')
+
+                TextColumn::make('text')
                     ->label('Text')
                     ->limit(50)
-                    ->searchable(),
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
 
-                Tables\Columns\TextColumn::make('author')
-                    ->label('Author')
-                    ->sortable()
+                        if (strlen($state) <= $column->getCharacterLimit()) {
+                            return null;
+                        }
+
+                        // Only render the tooltip if the column content exceeds the length limit.
+                        return $state;
+                    })
                     ->searchable(),
 
                 ToggleColumn::make('unblock_image')
                     ->afterStateUpdated(function ($record, $state) {
-                        if($state) dispatch(new \App\Jobs\GenerateBackground($record));
+                        if ($state) dispatch(new \App\Jobs\GenerateBackground($record));
                     }),
                 ToggleColumn::make('unblock_video')
                     ->afterStateUpdated(function ($record, $state) {
-                        if($state) dispatch(new \App\Jobs\GenerateVideo($record));
+                        if ($state) dispatch(new \App\Jobs\GenerateVideo($record));
                     }),
                 ToggleColumn::make('unblock_post')
                     ->afterStateUpdated(function ($record, $state) {
-                        if($state) dispatch(new \App\Jobs\UploadInstagramReel($record));
+                        if ($state) dispatch(new \App\Jobs\UploadInstagramReel($record));
                     }),
 
-                Tables\Columns\TextColumn::make('rendered_at')
+                TextColumn::make('author')
+                    ->label('Author')
+                    ->sortable()
+                    ->searchable(),
+
+
+                TextColumn::make('rendered_at')
                     ->label('Rendered At')
                     ->dateTime()
                     ->sortable(),
+                TextColumn::make('caption')
+                    ->limit(50)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+
+                        if (strlen($state) <= $column->getCharacterLimit()) {
+                            return null;
+                        }
+
+                        // Only render the tooltip if the column content exceeds the length limit.
+                        return $state;
+                    })
+                    ->searchable(),
             ])
             ->filters([
-                Tables\Filters\Filter::make('posted')
-                    ->query(fn(Builder $query) => $query->whereNotNull('posted_at'))
-                    ->label('Posted'),
+                SelectFilter::make('brand')
+                    ->relationship('brand', 'name'),
+                Filter::make('is_posted')
+                    ->query(fn(Builder $query): Builder => $query->whereNotNull('posted_at')),
+                TernaryFilter::make('unblock_image'),
+                TernaryFilter::make('unblock_video'),
+                TernaryFilter::make('unblock_post'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -103,7 +136,9 @@ class PostResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->poll('15s');
     }
 
     public static function getRelations(): array

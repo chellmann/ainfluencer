@@ -61,11 +61,13 @@ class PostResource extends Resource
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\ImageColumn::make('image')
-                    ->label('Image'),
+                    ->url(fn(Post $record): string => url('/posts/' . $record->id.'/preview'))
+                    ->openUrlInNewTab(),
                 Tables\Columns\TextColumn::make('text')
                     ->label('Text')
                     ->limit(50)
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('author')
                     ->label('Author')
                     ->sortable()

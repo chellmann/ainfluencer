@@ -94,9 +94,10 @@ class PostResource extends Resource
                         if ($state) dispatch(new \App\Jobs\GenerateVideo($record));
                     }),
                 ToggleColumn::make('unblock_post')
-                    ->afterStateUpdated(function ($record, $state) {
-                        if ($state) dispatch(new \App\Jobs\UploadInstagramReel($record));
-                    }),
+                    // ->afterStateUpdated(function ($record, $state) {
+                    //     if ($state) dispatch(new \App\Jobs\UploadInstagramReel($record));
+                    // })
+                    ,
 
                 TextColumn::make('author')
                     ->label('Author')

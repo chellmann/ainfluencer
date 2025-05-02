@@ -38,6 +38,12 @@ class AccountResource extends Resource
                         'youtube' => 'YouTube',
                     ]),
                 Forms\Components\TextInput::make('foreign_id')->label('ID auf Platform'),
+                Forms\Components\TagsInput::make('hours')
+                    ->label('Hours')
+                    ->placeholder('Enter hours'),
+                Forms\Components\TextInput::make('minute')
+                    ->label('Minute')
+                    ->placeholder('Enter minutes'),
             ]);
     }
 
@@ -57,10 +63,6 @@ class AccountResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->label('Platform'),
-                Tables\Columns\TextColumn::make('username')
-                    ->sortable()
-                    ->searchable()
-                    ->label('Username'),
                 Tables\Columns\TextColumn::make('brand.name')
                     ->sortable()
                     ->searchable()

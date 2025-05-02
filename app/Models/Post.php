@@ -45,6 +45,7 @@ class Post extends Model
     {
         static::created(queueable(function (Post $post) {
             $post->generateCaption();
+            $post->chooseMusic();
         }));
     }
 
@@ -83,7 +84,23 @@ class Post extends Model
         $this->save();
     }
 
+    public function chooseMusic(){
+        if ($this->music_id !== null) {
+            return;
+        }
+        //check if brand has music
+        if (BrandMusic::where('brand_id', $this->brand_id)->count() != 0) {
+            //select random music from brand
+            $this->music_id = BrandMusic::where('brand_id', $this->brand_id)->inRandomOrder()->first()->id;
+        }
+
+        $this->save();
+    }
+
     public function generateCaption(){
+        if($this->caption !== null) {
+            return;
+        }
         $result = OpenAI::chat()->create([
             'model' => 'gpt-4.1',
             'messages' => [
@@ -100,12 +117,6 @@ class Post extends Model
         ray($json);
         $this->caption = $json['caption'];
         $this->image_prompt = $json['prompt'];
-        //check if brand has music
-        if (BrandMusic::where('brand_id', $this->brand_id)->count() != 0) {
-            //select random music from brand
-            $this->music_id = BrandMusic::where('brand_id', $this->brand_id)->inRandomOrder()->first()->id;
-        }
-
 
         $this->save();
     }

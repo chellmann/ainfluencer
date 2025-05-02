@@ -61,7 +61,7 @@ Route::get('/testauth', function () {
 })->middleware(AuthenticateOnceWithBasicAuth::class);
 
 //generate a post resource to save a new post via json, validate the request
-Route::post('/posts', function (Illuminate\Http\Request $request) {
+Route::post('/post', function (Illuminate\Http\Request $request) {
     $validated = $request->validate([
         'brand_id' => 'required|exists:brands,id',
         'text' => 'required|string',

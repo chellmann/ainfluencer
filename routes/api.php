@@ -25,7 +25,7 @@ Route::post('/post', function (Request $request) {
         'font_style' => 'nullable|string',
     ]);
 
-    $post = Post::create($validated);
+    $post = \App\Models\Post::create($validated);
 
     return response()->json($post, 201);
 })->name('posts.store')->middleware(AuthenticateOnceWithBasicAuth::class);

@@ -61,6 +61,8 @@ class Post extends Model
         // Logic to generate video from SVG
         $mp4_path = 'posts/'.$this->id.'.mp4';
 
+        Process::path(base_path(''))->run('rm tmp.mp4');
+
         $command = 'node node_modules/timecut/cli.js ' . route('videoinput', $this->id) . ' --launch-arguments="' . env('TIMECUT_EXTRA', '') . '" --viewport="1080,1920" --start-delay=1 --fps=30 --duration=4 --frame-cache --output-options="-colorspace bt709 -c:v libx264" --pix-fmt=yuv420p --screenshot-type=jpeg --output=tmp.mp4';
 
         Log::debug("running command: $command");
@@ -82,7 +84,6 @@ class Post extends Model
             Log::debug($result->errorOutput());
 
             ray($result);
-            Process::path(base_path(''))->run('rm tmp.mp4');
         }else{
             Process::path(base_path(''))->run('mv tmp.mp4 '. storage_path('app/public/' . $mp4_path));
         }
@@ -90,8 +91,6 @@ class Post extends Model
         if ($result->failed()) {
             throw new \Exception('Failed to generate video: ' . $result->errorOutput());
         }
-
-        Process::path(base_path(''))->run('rm tmp.mp4');
 
         $this->mp4 = $mp4_path;
         $this->rendered_at = now();

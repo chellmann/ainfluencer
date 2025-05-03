@@ -48,9 +48,15 @@ class Post extends Model
 
     protected static function booted(): void
     {
+        static::created(function (Post $model) {
+            // Hier kannst du die Methode aufrufen, die du ausführen möchtest
+            $model->formatText();
+        });
+
         static::created(queueable(function (Post $post) {
             $post->generateCaption();
             $post->chooseMusic();
+            // $post->formatText();
         }));
     }
 
@@ -117,6 +123,42 @@ class Post extends Model
         $this->save();
     }
 
+    public function formatText()
+    {
+        // Prüfen, ob der Text bereits Zeilenumbrüche enthält
+        if (strpos($this->text, "\n") !== false) {
+            return;
+        }
+
+        // Text in Wörter aufteilen
+        $words = explode(' ', $this->text);
+
+        // Text in 3 bis 4 Zeilen aufteilen
+        $lines = [];
+        $currentLine = '';
+
+        foreach ($words as $word) {
+            // Prüfen, ob das Hinzufügen des nächsten Wortes die Zeilenlänge überschreitet
+            if (strlen($currentLine . ' ' . $word) > 25) { // 30 ist ein Beispielwert für die maximale Zeilenlänge
+                $lines[] = trim($currentLine);
+                $currentLine = $word;
+            } else {
+                $currentLine .= ' ' . $word;
+            }
+        }
+
+        // Letzte Zeile hinzufügen
+        if (!empty($currentLine)) {
+            $lines[] = trim($currentLine);
+        }
+
+        // Zeilen mit Zeilenumbrüchen verbinden
+        $this->text = implode("\n", $lines);
+
+        // Änderungen speichern
+        $this->save();
+    }
+
     public function generateCaption(){
         if($this->caption !== null) {
             return;
@@ -137,6 +179,8 @@ class Post extends Model
         ray($json);
         $this->caption = $json['caption'];
         $this->image_prompt = $json['prompt'];
+
+
 
         $this->save();
     }

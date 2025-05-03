@@ -2,10 +2,12 @@
 
 namespace App\Filament\Imports;
 
-use App\Models\Post;
-use Filament\Actions\Imports\ImportColumn;
-use Filament\Actions\Imports\Importer;
+use Filament\Forms\Components\Checkbox;
 use Filament\Actions\Imports\Models\Import;
+use Filament\Actions\Imports\Importer;
+use Filament\Actions\Imports\ImportColumn;
+use App\Models\Post;
+use Filament\Forms\Components\Select;
 
 class PostImporter extends Importer
 {
@@ -14,9 +16,6 @@ class PostImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('brand')
-                ->requiredMapping()
-                ->relationship(resolveUsing: ['name','id']),
             ImportColumn::make('text')
                 ->requiredMapping()
                 ->rules(['required']),
@@ -28,14 +27,24 @@ class PostImporter extends Importer
         ];
     }
 
+    public static function getOptionsFormComponents(): array
+    {
+        return [
+            Select::make('brand')
+                ->relationship('brand', 'name')
+                ->required()
+                ->label('Brand'),
+        ];
+    }
+
+
+
     public function resolveRecord(): ?Post
     {
-        // return Post::firstOrNew([
-        //     // Update existing records, matching them by `$this->data['column_name']`
-        //     'email' => $this->data['email'],
-        // ]);
+        $Post = new Post();
+        $Post->brand_id = $this->options['brand'];
 
-        return new Post();
+        return $Post;
     }
 
     public static function getCompletedNotificationBody(Import $import): string

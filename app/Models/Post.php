@@ -76,7 +76,14 @@ class Post extends Model
             if (!file_exists($music_path)) {
                 throw new \Exception('Music file not found: ' . $music_path);
             }
-            $command = 'ffmpeg -i tmp.mp4 ' . (!$this->music->start_time ?: '-itsoffset -' . $this->music->start_time) . ' -i ' . $music_path . ' -c copy -map 0:v:0 -map 1:a:0 -shortest -c:a aac -b:a 192k ' . storage_path('app/public/' . $mp4_path);
+
+            $command = 'ffmpeg -i tmp.mp4 ';
+
+            if($this->music->start_time > 0){
+                $command .= '-itsoffset -' . $this->music->start_time;
+            }
+
+            $command .=' -i ' . $music_path . ' -c copy -map 0:v:0 -map 1:a:0 -shortest -c:a aac -b:a 192k ' . storage_path('app/public/' . $mp4_path);
 
             Log::debug("running command: $command");
             $result = Process::path(base_path(''))->timeout(5000)->run($command);

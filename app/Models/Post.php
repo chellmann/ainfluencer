@@ -6,6 +6,7 @@ use function Illuminate\Events\queueable;
 use OpenAI\Laravel\Facades\OpenAI;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Music;
 use App\Models\Brand;
@@ -60,8 +61,12 @@ class Post extends Model
         // Logic to generate video from SVG
         $mp4_path = 'posts/'.$this->id.'.mp4';
 
-        $result = Process::path(base_path(''))->timeout(5000)
-            ->run('node node_modules/timecut/cli.js '. route('videoinput',$this->id). ' --launch-arguments="' . env('TIMECUT_EXTRA', '') . '" --viewport="1080,1920" --start-delay=1 --fps=30 --duration=4 --frame-cache --output-options="-colorspace bt709 -c:v libx264" --pix-fmt=yuv420p --screenshot-type=jpeg --output=tmp.mp4');
+        $command = 'node node_modules/timecut/cli.js ' . route('videoinput', $this->id) . ' --launch-arguments="' . env('TIMECUT_EXTRA', '') . '" --viewport="1080,1920" --start-delay=1 --fps=30 --duration=4 --frame-cache --output-options="-colorspace bt709 -c:v libx264" --pix-fmt=yuv420p --screenshot-type=jpeg --output=tmp.mp4';
+
+        Log::debug("running command: $command");
+        $result = Process::path(base_path(''))->timeout(5000)->run($command);
+        Log::debug($result->output());
+        Log::debug($result->errorOutput());
         ray($result);
 
         if($this->music){
@@ -69,8 +74,13 @@ class Post extends Model
             if (!file_exists($music_path)) {
                 throw new \Exception('Music file not found: ' . $music_path);
             }
-            $result = Process::path(base_path(''))->timeout(5000)
-                ->run('ffmpeg -i tmp.mp4 '. (!$this->music->start_time ?: '-itsoffset -'. $this->music->start_time) .' -i '. $music_path. ' -c copy -map 0:v:0 -map 1:a:0 -shortest -c:a aac -b:a 192k ' . storage_path('app/public/' . $mp4_path));
+            $command = 'ffmpeg -i tmp.mp4 ' . (!$this->music->start_time ?: '-itsoffset -' . $this->music->start_time) . ' -i ' . $music_path . ' -c copy -map 0:v:0 -map 1:a:0 -shortest -c:a aac -b:a 192k ' . storage_path('app/public/' . $mp4_path);
+
+            Log::debug("running command: $command");
+            $result = Process::path(base_path(''))->timeout(5000)->run($command);
+            Log::debug($result->output());
+            Log::debug($result->errorOutput());
+
             ray($result);
             Process::path(base_path(''))->run('rm tmp.mp4');
         }else{

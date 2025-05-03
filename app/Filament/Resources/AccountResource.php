@@ -38,12 +38,9 @@ class AccountResource extends Resource
                         'youtube' => 'YouTube',
                     ]),
                 Forms\Components\TextInput::make('foreign_id')->label('ID auf Platform'),
-                Forms\Components\TagsInput::make('hours')
-                    ->label('Hours')
-                    ->placeholder('Enter hours'),
-                Forms\Components\TextInput::make('minute')
-                    ->label('Minute')
-                    ->placeholder('Enter minutes'),
+                Forms\Components\TagsInput::make('times')
+                    ->label('Posting-Zeiten')
+                    ->placeholder('als HH:MM'),
             ]);
     }
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Post;
 use App\Models\Account;
 
 class Brand extends Model
@@ -19,5 +20,9 @@ class Brand extends Model
 
     public function music(){
         return $this->belongsToMany(Music::class);
+    }
+
+    public function posts(){
+        return $this->hasMany(Post::class);
     }
 }

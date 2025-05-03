@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\PlatformPosts;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Foundation\Queue\Queueable;
@@ -13,24 +14,25 @@ class UploadInstagramReel implements ShouldQueue
     use Queueable;
 
     public function __construct(
-        public Post $post,
+        public PlatformPosts $PlatformPost,
     ) {}
 
     public function handle()
     {
-        if(!$this->post->unblock_post){
+        $Post = $this->PlatformPost->post;
+        if(!$Post->unblock_post){
             throw new \Exception('Post is not unblock');
         }
-        // ray($this->post);
+        // ray($Post);
         //check if media and caption are givven
-        if($this->post->mp4 == null || $this->post->caption == null){
+        if($Post->mp4 == null || $Post->caption == null){
             throw new \Exception('Media or caption is missing');
         }
         //check if brand has an account
-        if($this->post->brand->accounts()->where('platform', 'instagram')->count() == 0){
+        if($Post->brand->accounts()->where('platform', 'instagram')->count() == 0){
             throw new \Exception('Brand has no Instagram account');
         }
-        $account = $this->post->brand->accounts()->where('platform', 'instagram')->first();
+        $account = $Post->brand->accounts()->where('platform', 'instagram')->first();
 
         //check if account is connected
         if($account->foreign_id == null){
@@ -40,8 +42,8 @@ class UploadInstagramReel implements ShouldQueue
         //prepare argument array
         $args = [
             'media_type' => 'REELS',
-            'video_url' => url('storage/'.$this->post->mp4),
-            'caption' => $this->post->caption,
+            'video_url' => url('storage/'.$Post->mp4),
+            'caption' => $Post->caption,
             'share_to_feed' => true,
             'access_token' => env('INSTAGRAM_TOKEN'),
         ];
@@ -91,8 +93,8 @@ class UploadInstagramReel implements ShouldQueue
             throw new \Exception('Instagram Media was not published: ' . $IG_MediaPublish->body());
         }
         //set post as published
-        $this->post->posted_at = now();
-        $this->post->save();
+        $Post->posted_at = now();
+        $Post->save();
 
         // ray($IG_MediaContainer->json());
 

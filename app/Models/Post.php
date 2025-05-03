@@ -41,6 +41,10 @@ class Post extends Model
         return $this->belongsTo(Music::class);
     }
 
+    public function platform_posts(){
+        return $this->hasMany(PlatformPosts::class);
+    }
+
     protected static function booted(): void
     {
         static::created(queueable(function (Post $post) {

@@ -12,10 +12,17 @@ class Account extends Model
         'handle',
         'platform',
         'foreign_id',
+        'times',
     ];
+
+    protected $casts = [
+        'times' => 'array',
+    ];
+
 
     public function brand()
     {
         return $this->belongsTo(Brand::class);
     }
+
 }

@@ -34,6 +34,7 @@ class AccountResource extends Resource
                     ->required()
                     ->options([
                         'instagram' => 'Instagram',
+                        'facebook' => 'Facebook',
                         'tiktok' => 'TikTok',
                         'youtube' => 'YouTube',
                     ]),

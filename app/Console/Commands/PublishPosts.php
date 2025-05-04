@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\UploadFacebookReel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Console\Command;
 use App\Models\Post;
@@ -76,6 +77,10 @@ class PublishPosts extends Command
                     case 'instagram':
                         UploadInstagramReel::dispatch($PlatformPost);
                     break;
+
+                    // case 'facebook':
+                    //     UploadFacebookReel::dispatch($PlatformPost);
+                    //     break;
 
                     default:
                         Log::error('Dont know how to post on ' . $account->platform);

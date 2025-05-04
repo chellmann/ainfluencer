@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use function Illuminate\Events\queueable;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Table;
@@ -12,6 +13,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\ImportAction;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables;
 use Filament\Resources\Resource;
 use Filament\Forms\Form;
@@ -138,6 +140,18 @@ class PostResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    BulkAction::make('Generate Image&Video')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            foreach ($records as $record) {
+                                $record->update([
+                                    'unblock_image' => true,
+                                    'unblock_video' => true,
+                                ]);
+                                dispatch(new \App\Jobs\GenerateBackground($record));
+                                dispatch(new \App\Jobs\GenerateVideo($record));
+                            }
+                        })
                 ]),
             ])
             ->headerActions([

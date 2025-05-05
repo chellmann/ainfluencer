@@ -106,6 +106,10 @@ class PostResource extends Resource
                     ->sortable()
                     ->searchable(),
 
+                TextColumn::make('rendered_at')
+                    ->label('Rendered At')
+                    ->dateTime()
+                    ->sortable(),
 
                 TextColumn::make('rendered_at')
                     ->label('Rendered At')
@@ -130,6 +134,8 @@ class PostResource extends Resource
                     ->relationship('brand', 'name'),
                 Filter::make('is_posted')
                     ->query(fn(Builder $query): Builder => $query->whereNotNull('posted_at')),
+                Filter::make('not posted')
+                    ->query(fn(Builder $query): Builder => $query->whereNull('posted_at')),
                 TernaryFilter::make('unblock_image'),
                 TernaryFilter::make('unblock_video'),
                 TernaryFilter::make('unblock_post'),

@@ -168,7 +168,8 @@ class Post extends Model
     }
 
     public function generateCaption(){
-        if($this->caption !== null) {
+        if($this->caption != null) {
+            ray('Caption already generated');
             return;
         }
         $result = OpenAI::chat()->create([
@@ -187,8 +188,6 @@ class Post extends Model
         ray($json);
         $this->caption = $json['caption'];
         $this->image_prompt = $json['prompt'];
-
-
 
         $this->save();
     }

@@ -14,6 +14,15 @@ class EditPost extends EditRecord
     {
         return [
             Actions\DeleteAction::make(),
+            Actions\Action::make('regenerateCaption')
+                ->label('Regenerate Caption')
+                ->action(function () {
+                    ray($this->record);
+                    $this->record->caption = '';
+                    $this->record->save();
+
+                    $this->record->generateCaption();
+                }),
         ];
     }
 }

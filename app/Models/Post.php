@@ -8,7 +8,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\PostImagealternatives;
+use App\Models\PlatformPosts;
 use App\Models\Music;
+use App\Models\Imagemodel;
+use App\Models\BrandMusic;
 use App\Models\Brand;
 
 class Post extends Model
@@ -44,6 +48,10 @@ class Post extends Model
 
     public function platform_posts(){
         return $this->hasMany(PlatformPosts::class);
+    }
+
+    public function imageAlternatives(){
+        return $this->hasMany(PostImagealternatives::class);
     }
 
     protected static function booted(): void
@@ -190,20 +198,9 @@ class Post extends Model
             return;
         }
 
-        $result = OpenAI::images()->create([
-            'prompt' => $this->image_prompt,
-            'model' => 'gpt-image-1',
-            'n' => 1,
-            'size' => '1024x1536',
-        ]);
+        // $image = Imagemodel::find(2)->generateImage($this->image_prompt);
+        $image = $this->brand->imagemodel->generateImage($this->image_prompt);
 
-        // ray($result);
-
-        $image = $result->data[0]->b64_json;
-        if ($image === null) {
-            throw new \Exception('Failed to generate image: ' . $result->error);
-        }
-        $image = base64_decode($image);
         if ($image === false) {
             throw new \Exception('Failed to decode image ');
         }
@@ -219,4 +216,5 @@ class Post extends Model
         $this->save();
 
     }
+
 }

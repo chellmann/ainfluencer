@@ -10,7 +10,8 @@ class Brand extends Model
 {
     protected $fillable = [
         'name',
-        'prompt_info'
+        'prompt_info',
+        'imagemodel_id',
     ];
 
     public function accounts()
@@ -25,4 +26,10 @@ class Brand extends Model
     public function posts(){
         return $this->hasMany(Post::class);
     }
+
+    public function imagemodel()
+    {
+        return $this->belongsTo(ImageModel::class);
+    }
+
 }

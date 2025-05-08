@@ -35,6 +35,9 @@ class BrandResource extends Resource
                     ->rows(5)
                     ->maxLength(255)
                     ->helperText('Wird an ChatGPT übergben für das erzeugen der Caption und des Bildes. Tonalität und intension können mit übergben werden.'),
+                Forms\Components\Select::make('imagemodel_id')
+                    ->relationship('imagemodel', 'name')
+                    ->required(),
             ]);
     }
 
@@ -50,6 +53,7 @@ class BrandResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->label('Brand Name'),
+
             ])
             ->filters([
                 //

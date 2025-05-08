@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Post;
+use App\Models\Imagemodel;
 use App\Models\Account;
 
 class Brand extends Model
@@ -29,7 +30,7 @@ class Brand extends Model
 
     public function imagemodel()
     {
-        return $this->belongsTo(ImageModel::class);
+        return $this->belongsTo(Imagemodel::class);
     }
 
 }

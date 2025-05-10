@@ -166,8 +166,11 @@ class PostResource extends Resource
                                     'unblock_image' => true,
                                     'image_prompt' => '',
                                 ]);
-                                $record->generateCaption();
-                                dispatch(new \App\Jobs\GenerateBackground($record));
+                                dispatch(function () use ($record) {
+                                    $record->generateCaption();
+                                });
+
+                                dispatch(new \App\Jobs\GenerateBackground($record))->delay(now()->addSeconds(30));
                             }
                         }),
                     BulkAction::make('Post')

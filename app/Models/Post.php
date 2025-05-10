@@ -168,8 +168,8 @@ class Post extends Model
     }
 
     public function generateCaption(){
-        if($this->caption != null) {
-            ray('Caption already generated');
+        if($this->caption != null && $this->image_prompt != null) {
+            ray('Caption&Prompt already generated');
             return;
         }
         $result = OpenAI::chat()->create([
@@ -186,8 +186,8 @@ class Post extends Model
             throw new \Exception('Failed to decode JSON: ' . json_last_error_msg());
         }
         ray($json);
-        $this->caption = $json['caption'];
-        $this->image_prompt = $json['prompt'];
+        if($this->caption == '') $this->caption = $json['caption'];
+        if($this->image_prompt == '') $this->image_prompt = $json['prompt'];
 
         $this->save();
     }

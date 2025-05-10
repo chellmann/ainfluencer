@@ -157,6 +157,41 @@ class PostResource extends Resource
                                 dispatch(new \App\Jobs\GenerateBackground($record));
                                 dispatch(new \App\Jobs\GenerateVideo($record));
                             }
+                        }),
+                    BulkAction::make('Redo Prompt&Image')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            foreach ($records as $record) {
+                                $record->update([
+                                    'unblock_image' => true,
+                                    'image_prompt' => '',
+                                ]);
+                                $record->generateCaption();
+                                dispatch(new \App\Jobs\GenerateBackground($record));
+                            }
+                        }),
+                    BulkAction::make('Post')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            foreach ($records as $record) {
+                                if($record->unblock_image != true){
+                                    $record->update([
+                                        'unblock_image' => true,
+                                    ]);
+                                    dispatch(new \App\Jobs\GenerateBackground($record));
+                                }
+                                if($record->unblock_video != true){
+                                    $record->update([
+                                        'unblock_video' => true,
+                                    ]);
+                                    dispatch(new \App\Jobs\GenerateVideo($record));
+                                }
+                                if($record->unblock_post != true){
+                                    $record->update([
+                                        'unblock_post' => true,
+                                    ]);
+                                }
+                            }
                         })
                 ]),
             ])

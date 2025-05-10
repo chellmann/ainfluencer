@@ -193,9 +193,11 @@ class Post extends Model
     }
 
     public function generateBackgroundWithAi(){
-        if(!$this->unblock_image) {
+        if(!$this->unblock_image || $this->image_prompt == '') {
             return;
         }
+
+        $image_path = 'posts/bg_' . $this->id . '.png';
 
         // $image = Imagemodel::find(2)->generateImage($this->image_prompt);
         $image = $this->brand->imagemodel->generateImage($this->image_prompt);
@@ -209,7 +211,10 @@ class Post extends Model
             throw new \Exception('Invalid image data');
         }
         //save image to file
-        $image_path = 'posts/bg_'.$this->id.'.png';
+        //delete old image
+        if (Storage::disk('public')->exists($image_path)) {
+            Storage::disk('public')->delete($image_path);
+        }
         Storage::disk('public')->put($image_path, $image);
         $this->image = $image_path;
         $this->save();

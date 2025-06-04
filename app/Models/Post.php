@@ -57,7 +57,6 @@ class Post extends Model
     protected static function booted(): void
     {
         static::created(function (Post $model) {
-            // Hier kannst du die Methode aufrufen, die du ausführen möchtest
             $model->formatText();
         });
 
@@ -133,13 +132,12 @@ class Post extends Model
 
     public function formatText()
     {
-        // Prüfen, ob der Text bereits Zeilenumbrüche enthält
-        if (strpos($this->text, "\n") !== false) {
-            return;
-        }
-
         // Text in Wörter aufteilen
         $words = explode(' ', $this->text);
+
+        if(strlen($words[0]) < 25) {
+            return; // Wenn das erste Wort kürzer als 25 Zeichen ist, wird der Text nicht formatiert
+        }
 
         // Text in 3 bis 4 Zeilen aufteilen
         $lines = [];
@@ -147,7 +145,7 @@ class Post extends Model
 
         foreach ($words as $word) {
             // Prüfen, ob das Hinzufügen des nächsten Wortes die Zeilenlänge überschreitet
-            if (strlen($currentLine . ' ' . $word) > 25) { // 30 ist ein Beispielwert für die maximale Zeilenlänge
+            if (strlen($currentLine . ' ' . $word) > 20) { // 30 ist ein Beispielwert für die maximale Zeilenlänge
                 $lines[] = trim($currentLine);
                 $currentLine = $word;
             } else {
